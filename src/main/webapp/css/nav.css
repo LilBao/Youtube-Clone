@@ -1,0 +1,36 @@
+@charset "ISO-8859-1";
+
+.search input[type="text"] {
+    width: 100px;
+    -webkit-transition: width .35s ease-in-out;
+    transition: width .35s ease-in-out;
+  }
+
+  .search input[type="text"]:focus {
+    width: 100%;
+  }
+  .search input {
+    border: 0px;
+    border-radius: 0px;
+  }
+
+  .search input:focus {
+    outline: none !important;
+    border-bottom: 1px solid gray;
+  }
+
+  .search button {
+    background-color: transparent;
+    border: 0px;
+    border-radius: 0px;
+  }
+
+  .search button i {
+    color: black;
+  }
+
+  .search button:hover {
+    background-color: transparent;
+    color: black;
+  }
+  

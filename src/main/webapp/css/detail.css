@@ -1,0 +1,8 @@
+@charset "ISO-8859-1";
+.detail{
+    background: #eeeeee;
+}
+.detail:hover{
+    background: #b8b8b8;
+}
+

@@ -1,0 +1,30 @@
+@charset "ISO-8859-1";
+.nav a {
+    color: black;
+  }
+
+  .offcanvas-body a {
+    font-family: "apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif;
+    border: 0px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .offcanvas-body a:hover {
+    border-radius: 75px 75px 75px 75px;
+    background: #efefef;
+  }
+
+  .b i {
+    width: 100px;
+  }
+
+  .offcanvas-body a:focus {
+    font-weight: bold!important;
+  }
+
+  .vl {
+    border-right: 2px solid black!important;
+  	height: 1000px;
+  	z-index:2;
+  }
