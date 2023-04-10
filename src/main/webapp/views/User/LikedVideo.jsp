@@ -35,25 +35,44 @@
 </style>
 </head>
 <body>
+	<script type="text/javascript">
+		var btnOK = document.querySelector(".btnOK");
+		var mails = document.getElementById("mails");
+		var shareID = null;
+
+		$('#myModal').on('show.bs.modal', function(event) {
+			var button = $(event.relatedTarget);
+			shareID = button.data('share-id');
+			btnOK.setAttribute("formaction", '${url}?shareID=' + shareID);
+		});
+
+		btnOK.addEventListener('click', function(event) {
+			event.preventDefault();
+			var shareEmail = mails.value;
+		});
+	</script>
 	<section>
 		<jsp:include page="navbar.jsp"></jsp:include>
 	</section>
 	<section>
-	<c:url var="url" value="/likedVideo"></c:url>
+		<c:url var="url" value="/likedVideo"></c:url>
 		<div class="container">
 			<div class="row">
 				<c:forEach var="item" items="${list}">
 					<div class="col-md-4 col-sm-12">
 						<div class="card my-3">
-							<a href="/PS24728_NguyenVanBao_ASM/detail"  onclick="event.preventDefault(); window.location.href='/PS24728_NguyenVanBao_ASM/detail?id=${item.id}'"> 
-							<c:if test="${not empty item.poster}">
-							 <img class="w-100 card-img-top" style="height: 200px; object-fit: cover;"
-								src="https://img.youtube.com/vi/${item.poster}/maxresdefault.jpg" alt="Card image"> 
-							</c:if>
-							<c:if test="${empty item.poster}">
-							 <img class="w-100 card-img-top" style="height: 200px; object-fit: cover;"
-								src="/PS24728_NguyenVanBao_ASM/files/str.jpg" alt="Card image"> 
-							</c:if>
+							<a href="/PS24728_NguyenVanBao_ASM/detail"
+								onclick="event.preventDefault(); window.location.href='/PS24728_NguyenVanBao_ASM/detail?id=${item.id}'">
+								<c:if test="${not empty item.poster}">
+									<img class="w-100 card-img-top"
+										style="height: 200px; object-fit: cover;"
+										src="https://img.youtube.com/vi/${item.poster}/maxresdefault.jpg"
+										alt="Card image">
+								</c:if> <c:if test="${empty item.poster}">
+									<img class="w-100 card-img-top"
+										style="height: 200px; object-fit: cover;"
+										src="/PS24728_NguyenVanBao_ASM/files/str.jpg" alt="Card image">
+								</c:if>
 							</a>
 							<div class="card-body">
 								<div class="row">
@@ -70,18 +89,20 @@
 													<i class="bx bx-dots-vertical-rounded"></i>
 												</button>
 												<ul class="dropdown-menu">
-													<li>
-														<a class="dropdown-item" href="#" onclick="event.preventDefault(); window.location.href='${url}?idVideo=${item.id}'">
-															<i class="bi bi-list-check">UnLike</i>
-														</a>
-														<script>
-														// Lấy giá trị tham số id từ URL
-														const urlParams = new URLSearchParams(window.location.search);
-														const videoID = urlParams.get('id');
-														</script>
-													</li>
 													<li><a class="dropdown-item" href="#"
-														data-bs-toggle="modal" data-bs-target="#myModal"><i
+														onclick="event.preventDefault(); window.location.href='${url}?idVideo=${item.id}'">
+															<i class="bi bi-list-check">UnLike</i>
+													</a> <script>
+														// Lấy giá trị tham số id từ URL
+														const urlParams = new URLSearchParams(
+																window.location.search);
+														const videoID = urlParams
+																.get('id');
+													</script></li>
+													<li><a href="#" class="dropdown-item"
+														onclick="window.history.replaceState(null, null, '${url}?shareID=${item.id}')"
+														data-share-id="${item.id}" data-bs-toggle="modal"
+														data-bs-target="#myModal"><i
 															class="bi bi-cloud-arrow-up">Share</i></a></li>
 												</ul>
 											</div>
@@ -92,6 +113,31 @@
 						</div>
 					</div>
 				</c:forEach>
+				<div class="modal fade" id="myModal">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<!-- Modal Header -->
+							<div class="modal-header">
+								<h4 class="modal-title">Share your friend</h4>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+							</div>
+							<!-- Modal body -->
+							<div class="modal-body">
+								<form action="${url}" method="post" class="was-validated">
+									<div class="mb-3 ">
+										<mark>${msg2}</mark>
+										<label for="" class="form-label">Nhập email muốn gửi:
+										</label> <input name="share" id="mails" type="text"
+											class="form-control" required>
+									</div>
+									<div class="d-flex justify-content-end">
+										<button formaction='' class="btn btn-primary btnOK">OK</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>

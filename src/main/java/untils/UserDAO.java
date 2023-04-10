@@ -67,7 +67,5 @@ public class UserDAO {
 		query.setParameter("title", title);
 		List<User> list = query.getResultList();
 		return list;
-
-
 	}
 }

@@ -8,7 +8,7 @@
 		<div class="offcanvas-body">
 			<div class="w-100 list-group">
 				<h5 class="text-center">Aministrator admin</h5>
-				<a class="list-group-item py-3 m-2" href="/PS24728_NguyenVanBao_ASM/Admin"> 
+				<a class="list-group-item py-3 m-2" href="/PS24728_NguyenVanBao_ASM/home"> 
 					<i class="mx-2 bi bi-house-heart-fill"></i> Home
 				</a> 
 				<a class="list-group-item py-3 m-2" href="/PS24728_NguyenVanBao_ASM/Video">

@@ -1,5 +1,6 @@
-<%@ page 
-    pageEncoding="utf-8"%>
+<%@ page pageEncoding="utf-8"%>
+<%@ taglib uri="http://java.sun.com/jstl/core_rt" prefix="c"%>
+
    <nav class="navbar navbar-expand-lg navbar-light bg-white">
     <div class="container-fluid ">
       <a class="navbar-brand" href="/PS24728_NguyenVanBao_ASM/home">
@@ -13,8 +14,13 @@
 
       <ul class="nav ms-auto navbar-right">
         <li class="nav-item">
-          <a class="nav-link" href="/PS24728_NguyenVanBao_ASM/likedVideo"><i class="bi bi-hand-thumbs-up">Liked Video</i></a>
+          <a style=" color: black;" class="nav-link" href="/PS24728_NguyenVanBao_ASM/likedVideo">Liked Video</a>
         </li>
+        <li class="nav-item">
+        <c:if test="${sessionScope.us.admin}">
+			<a style=" color: black;" class="nav-link" href="/PS24728_NguyenVanBao_ASM/Admin">Management</a>
+		</c:if>
+		</li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
             <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (31).webp" class="rounded-circle" height="22"
@@ -23,28 +29,31 @@
           <ul class="dropdown-menu dropdown-menu-end w-50">
             <li>
               <a class="dropdown-item" href="#">
+              <c:if test="${not empty sessionScope.us}">
                 <div class="d-flex">
                   <div class="flex-shrink-0 me-3">
                     <div class="">
-                      <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (31).webp" height="50" alt
-                        class="w-15 rounded-circle" />
+                      <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (31).webp" height="50" class="w-15 rounded-circle" />
                     </div>
                   </div>
                   <div class="flex-grow-1">
-                    <span class="fw-semibold d-block">John Doe</span>
-                    <small class="text-muted">Admin</small>
+                    <span class="fw-semibold d-block">${sessionScope.us.fullname}</span>
+                    <small class="text-muted">${sessionScope.us.admin}Admin</small>
                   </div>
                 </div>
+               </c:if>
               </a>
             </li>
             <li>
               <div class="dropdown-divider"></div>
             </li>
             <li>
+            <c:if test="${empty sessionScope.us}">
               <a class="dropdown-item" href="/PS24728_NguyenVanBao_ASM/login">
                 <i class="bx bx-user me-2"></i>
                 <span class="align-middle">Login</span>
               </a>
+              </c:if>
             </li>
             <li>
               <a class="dropdown-item" href="/PS24728_NguyenVanBao_ASM/edit-profile">

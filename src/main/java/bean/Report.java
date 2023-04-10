@@ -12,6 +12,8 @@ import javax.persistence.StoredProcedureParameter;
 		@NamedStoredProcedureQuery(name = "Report.favoriteByYear", procedureName = "spFavoriteByYear", parameters = {
 				@StoredProcedureParameter(name = "year", type = Integer.class) }, resultClasses = { Report.class }),
 		@NamedStoredProcedureQuery(name="Report.favoritesUser",procedureName = "spFavoritesUser", parameters = {
+				@StoredProcedureParameter(name="id",type =String.class)}),
+		@NamedStoredProcedureQuery(name="Report.sendMail",procedureName = "sp_reportSendMail", parameters = {
 				@StoredProcedureParameter(name="id",type =String.class)})
 })
 @Entity

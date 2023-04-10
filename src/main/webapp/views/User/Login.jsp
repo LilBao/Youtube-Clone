@@ -30,16 +30,14 @@
 				method="post">
 				<h4 class="mx-5 mt-5">Đăng Nhập</h4>
 				<div class="form-outline mx-5 ">
-					<div class="form-floating">
-						<input name="id" type="text" id="loginName" class="form-control"
-							placeholder="Email or username" /> <label class="form-label"
-							for="loginName">Email or username</label>
+				 	<div class="form-floating">
+						<input value="${username}" name="id" type="text" id="loginName" class="form-control" placeholder="Email or username" /> 
+							<label class="form-label" for="loginName">Email or username</label>	
 					</div>
-
 				</div>
 				<div class="form-outline my-4 mx-5">
 					<div class="form-floating">
-						<input name="password" type="password" id="form2Example2"
+						<input value="${password}" name="password" type="password" id="form2Example2"
 							class="form-control" placeholder="password" /> <label
 							class="form-label" for="form2Example2">password</label>
 					</div>

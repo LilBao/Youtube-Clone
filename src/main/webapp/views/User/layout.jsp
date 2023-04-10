@@ -44,7 +44,21 @@
 			// Lấy giá trị tham số id từ URL
 			const urlParams = new URLSearchParams(window.location.search);
 			const videoID = urlParams.get('id');
-			const shareID=urlParams.get('id');
+			
+			 var btnOK = document.querySelector(".btnOK");
+			  var mails = document.getElementById("mails");
+			  var shareID = null;
+
+			  $('#myModal').on('show.bs.modal', function (event) {
+			    var button = $(event.relatedTarget);
+			    shareID = button.data('share-id');
+			    btnOK.setAttribute("formaction", '${url}?shareID=' + shareID);
+			  });
+
+			  btnOK.addEventListener('click', function (event) {
+			    event.preventDefault();
+			    var shareEmail = mails.value;
+			  });
 		</script>
 		<div class="container">
 			<div class="row">
@@ -68,7 +82,7 @@
 								<div class="row">
 									<div class="col-11">
 										<h5 class="m-0">${item.title}</h5>
-										<p class="m-0">${item.views}</p>
+										<p class="m-0">${item.views}Views</p>
 									</div>
 									<div class="col-1">
 										<div class="dropdown">
@@ -78,14 +92,27 @@
 													<i class="bx bx-dots-vertical-rounded"></i>
 												</button>
 												<ul class="dropdown-menu">
-													<li><a class="dropdown-item" href="#"
-														onclick="event.preventDefault(); window.location.href='${url}?idVideo=${item.id}'">
-															<i class="bi bi-list-check">Like</i>
-													</a></li>
-													<li><a href="#" class="dropdown-item"
-														data-bs-toggle="modal" data-bs-target="#myModal">
-															<i class="bi bi-cloud-arrow-up">Share</i>
-													</a></li>
+													<c:if test="${not empty sessionScope.us}">
+														<li><a class="dropdown-item" href="#"
+															onclick="event.preventDefault(); window.location.href='${url}?idVideo=${item.id}'">
+																<i class="bi bi-list-check">Like</i>
+														</a></li>
+														<li><a href="#" class="dropdown-item"
+															onclick="window.history.replaceState(null, null, '${url}?shareID=${item.id}')"
+															 data-share-id="${item.id}" data-bs-toggle="modal" data-bs-target="#myModal"> <i
+																class="bi bi-cloud-arrow-up">Share</i>
+														</a></li>
+													</c:if>
+													<c:if test="${empty sessionScope.us}">
+														<li><a class="dropdown-item"
+															href="/PS24728_NguyenVanBao_ASM/login"> <i
+																class="bi bi-list-check">Like</i>
+														</a></li>
+														<li><a href="/PS24728_NguyenVanBao_ASM/login"
+															class="dropdown-item"> <i
+																class="bi bi-cloud-arrow-up">Share</i>
+														</a></li>
+													</c:if>
 												</ul>
 											</div>
 										</div>
@@ -94,31 +121,31 @@
 							</div>
 						</div>
 					</div>
-					<div class="modal fade" id="myModal">
-						<div class="modal-dialog">
-							<div class="modal-content">
-								<!-- Modal Header -->
-								<div class="modal-header">
-									<h4 class="modal-title">Share your friend</h4>
-									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-								</div>
-								<!-- Modal body -->
-								<div class="modal-body">
-									<form action="" class="was-validated">
-										<div class="mb-3 ">
-											<label for="" class="form-label">Nhập email muốn gửi:
-											</label> <input name="share" type="text" class="form-control"
-												required>
-										</div>
-										<div class="d-flex justify-content-end">
-											<a onclick="event.preventDefault(); window.location.href='${url}?shareID=${item.id}'" class="btn btn-primary btnOK">OK</a>
-										</div>
-									</form>
-								</div>
+				</c:forEach>
+				<div class="modal fade" id="myModal">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<!-- Modal Header -->
+							<div class="modal-header">
+								<h4 class="modal-title">Share your friend</h4>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+							</div>
+							<!-- Modal body -->
+							<div class="modal-body">
+								<form action="${url}" method="post" class="was-validated">
+									<div class="mb-3 ">
+										<mark>${msg2}</mark>
+										<label for="" class="form-label">Nhập email muốn gửi:
+										</label> <input name="share" id="mails" type="text" class="form-control" required>
+									</div>
+									<div class="d-flex justify-content-end">
+										<button formaction='' class="btn btn-primary btnOK">OK</button>
+									</div>
+								</form>
 							</div>
 						</div>
 					</div>
-				</c:forEach>
+				</div>
 			</div>
 		</div>
 	</section>

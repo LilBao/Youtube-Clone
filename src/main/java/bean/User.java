@@ -9,7 +9,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="Users")
+@Table(name = "Users")
 public class User {
 	@Id
 	@Column(name = "id")
@@ -21,15 +21,18 @@ public class User {
 	@Column(name = "email")
 	String email;
 	@Column(name = "admin")
-	Boolean admin=false;
-	@OneToMany(mappedBy="user")
+	Boolean admin = false;
+	@OneToMany(mappedBy = "user")
 	List<Favorite> favorite;
+	@OneToMany(mappedBy = "user")
+	List<Share> share;
 
 	public User() {
 		super();
 	}
 
-	public User(String id, String password, String fullname, String email, Boolean admin, List<Favorite> favorite) {
+	public User(String id, String password, String fullname, String email, Boolean admin, List<Favorite> favorite,
+			List<Share> share) {
 		super();
 		this.id = id;
 		this.password = password;
@@ -37,6 +40,15 @@ public class User {
 		this.email = email;
 		this.admin = admin;
 		this.favorite = favorite;
+		this.share = share;
+	}
+
+	public List<Share> getShare() {
+		return share;
+	}
+
+	public void setShare(List<Share> share) {
+		this.share = share;
 	}
 
 	public String getId() {

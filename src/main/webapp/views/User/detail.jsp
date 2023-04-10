@@ -22,16 +22,17 @@
 <link rel="stylesheet" href="/PS24728_NguyenVanBao_ASM/css/detail.css">
 </head>
 <style>
-.title{
+.title {
 	font-family: "YouTube Sans", Roboto, sans-serif;
-	font-size:20px;
-	line-height:28px;
-	text-align:start;
-	font-weight:600;
-	letter-spacing:normal;
+	font-size: 20px;
+	line-height: 28px;
+	text-align: start;
+	font-weight: 600;
+	letter-spacing: normal;
 }
-.card{
-	border:0px !important;
+
+.card {
+	border: 0px !important;
 }
 </style>
 <body>
@@ -39,23 +40,20 @@
 		// Lấy giá trị tham số id từ URL
 		const urlParams = new URLSearchParams(window.location.search);
 		const itemId = urlParams.get('id');
-		const like = urlParams.get('id');
-		const dislike = urlParams.get('id');
 	</script>
 	<section>
 		<jsp:include page="navbar.jsp"></jsp:include>
-		<jsp:include page="share.jsp"></jsp:include>
 	</section>
 	<section>
 		<div class="container-fluid col-11">
 			<div class="row">
 				<div class="col-md-9">
-					<iframe class="w-100" height="500"
-						title="YouTube video player" frameborder="0"
+					<iframe class="w-100" height="500" title="YouTube video player"
+						frameborder="0"
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowfullscreen autoplay
-						src="https://www.youtube.com/embed/${form.id}">
-						Your browser does not support HTML video. </iframe>
+						src="https://www.youtube.com/embed/${form.id}"> Your
+						browser does not support HTML video. </iframe>
 					<p class="title my-0">${form.title}</p>
 					<div class="row">
 						<div class="col-6">
@@ -64,18 +62,36 @@
 						</div>
 						<div class="col-6">
 							<div class="d-flex justify-content-center">
-								<div class="btn-group rounded-pill mx-3">
-									<a href="#" onclick="event.preventDefault(); window.location.href='${url}?like=${form.id}'" class="btn detail" type="button">
-										<i class="bi bi-hand-thumbs-up"></i>35N
+								<c:if test="${not empty sessionScope.us}">
+									<div class="btn-group rounded-pill mx-3">
+										<a href="#"
+											onclick="event.preventDefault(); location.href='${url}?id=${form.id}'"
+											class="btn detail" type="button"> <i
+											class="bi bi-hand-thumbs-up"></i>35N
+										</a> <a href="#"
+											onclick="event.preventDefault(); location.href='${url}?id=${form.id}'"
+											class="btn detail" type="button"> <i
+											class="bi bi-hand-thumbs-down"></i>
+										</a>
+									</div>
+									<button class="btn mx-3 rounded-pill detail" type="button"
+										data-bs-toggle="modal" data-bs-target="#myModal">
+										<i class="bi bi-cloud-arrow-up"></i>Share
+									</button>
+								</c:if>
+								<c:if test="${empty sessionScope.us}">
+									<div class="btn-group rounded-pill mx-3">
+										<a href="/PS24728_NguyenVanBao_ASM/login" class="btn detail" type="button"> <i
+											class="bi bi-hand-thumbs-up"></i>35N
+										</a> <a href="/PS24728_NguyenVanBao_ASM/login" class="btn detail" type="button"> <i
+											class="bi bi-hand-thumbs-down"></i>
+										</a>
+									</div>
+									<a href="/PS24728_NguyenVanBao_ASM/login" class="btn mx-3 rounded-pill detail" type="button">
+										<i class="bi bi-cloud-arrow-up"></i>Share
 									</a>
-									<a href="#" onclick="event.preventDefault(); window.location.href='${url}?dislike=${form.id}'" class="btn detail" type="button">
-										<i class="bi bi-hand-thumbs-down"></i>
-									</a>
-								</div>
-								<button class="btn mx-3 rounded-pill detail" type="button"
-									data-bs-toggle="modal" data-bs-target="#myModal">
-									<i class="bi bi-cloud-arrow-up"></i>Share
-								</button>
+								</c:if>
+
 								<div class="dropdown mx-3">
 									<button class="dots btn rounded-circle dropdown-toggle detail"
 										data-bs-toggle="dropdown">
@@ -96,10 +112,34 @@
 					</div>
 				</div>
 				<div class="d-flex flex-column col-md-3">
-					<jsp:include page="list.jsp"/>
+					<jsp:include page="list.jsp" />
 				</div>
 			</div>
 		</div>
 	</section>
+	<div class="modal fade" id="myModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<!-- Modal Header -->
+			<div class="modal-header">
+				<h4 class="modal-title">Share your friend</h4>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<!-- Modal body -->
+			<div class="modal-body">
+				<form action="${url}" method="post" class="was-validated">
+					<div class="mb-3 ">
+						<mark>${msg2}</mark>
+						<label for="" class="form-label">Nhập email muốn gửi: </label> <input
+							name="share" id="mails" type="text" class="form-control" required>
+					</div>
+					<div class="d-flex justify-content-end">
+						<button formaction='' class="btn btn-primary btnOK">OK</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 </body>
 </html>

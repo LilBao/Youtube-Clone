@@ -1,5 +1,6 @@
-<%@ page 
-    pageEncoding="utf-8"%>
+<%@ page pageEncoding="utf-8"%>
+    <%@ taglib uri="http://java.sun.com/jstl/core_rt" prefix="c"%>
+    
 <nav class="navbar navbar-expand-sm navbar-light bg-white my-2 rounded-pill">
     <div class="container-fluid">
     	<button class="navbar-toggler navbar-light buttonCss" type="button" data-bs-toggle="offcanvas"
@@ -22,25 +23,26 @@
           <ul class="dropdown-menu dropdown-menu-end w-50">
             <li>
               <a class="dropdown-item" href="#">
+                <c:if test="${not empty sessionScope.us}">
                 <div class="d-flex">
                   <div class="flex-shrink-0 me-3">
                     <div class="">
-                      <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (31).webp" height="50"
-                        class="w-15 rounded-circle" />
+                      <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (31).webp" height="50" class="w-15 rounded-circle" />
                     </div>
                   </div>
                   <div class="flex-grow-1">
-                    <span class="fw-semibold d-block">John Doe</span>
+                    <span class="fw-semibold d-block">${sessionScope.us.fullname}</span>
                     <small class="text-muted">Admin</small>
                   </div>
                 </div>
+               </c:if>
               </a>
             </li>
             <li>
               <div class="dropdown-divider"></div>
             </li>
             <li>
-              <a class="dropdown-item" href="#">
+              <a class="dropdown-item" href="/PS24728_NguyenVanBao_ASM/edit-profile">
                 <i class="bx bx-user me-2"></i>
                 <span class="align-middle">My Profile</span>
               </a>

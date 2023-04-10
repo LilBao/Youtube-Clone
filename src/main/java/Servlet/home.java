@@ -25,9 +25,11 @@ import org.apache.commons.beanutils.BeanUtils;
 import Filter.CookieUntils;
 import bean.Favorite;
 import bean.LikedVideo;
+import bean.Share;
 import bean.User;
 import bean.Video;
 import untils.FavoriteDAO;
+import untils.ShareDAO;
 import untils.UserDAO;
 import untils.VideoDAO;
 import untils.likedVideoDAO;
@@ -41,6 +43,10 @@ public class home extends HttpServlet {
 		if (uri.contains("home")) {
 			this.doHome(req, resp);
 		} else if (uri.contains("login")) {
+			String username = CookieUntils.get("username", req);
+			String password = CookieUntils.get("password", req);
+			req.setAttribute("username", username);
+			req.setAttribute("password", password);
 			this.doSignIn(req, resp);
 		} else if (uri.contains("signup")) {
 			this.doSignUp(req, resp);
@@ -65,24 +71,35 @@ public class home extends HttpServlet {
 		String idVideo = req.getParameter("idVideo");
 		if (idVideo != null) {
 			unLike(us.getId(), idVideo);
-			req.getSession().setAttribute("us",us);
+			req.getSession().setAttribute("us", us);
+		}
+		String shareID = req.getParameter("shareID");
+		if (shareID != null) {
+			String share = req.getParameter("share");
+			share(us.getEmail(), share, shareID, req, resp);
+			if (sendMail = true) {
+				createShare(us, shareID, shareID);
+			}
 		}
 		req.getRequestDispatcher("views/User/LikedVideo.jsp").forward(req, resp);
 	}
 
 	private void doHome(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String uri = req.getRequestURI();
 		User us = (User) req.getSession().getAttribute("us");
 		VideoDAO dao = new VideoDAO();
 		List<Video> list = dao.orderByViews();
 		req.setAttribute("homes", list);
-		String idVideo=req.getParameter("idVideo");
-		String shareID=req.getParameter("shareID");
-		if(idVideo!=null) {
+		String idVideo = req.getParameter("idVideo");
+		String shareID = req.getParameter("shareID");
+		if (idVideo != null) {
 			like(us, idVideo, req, resp);
 		}
-		if (shareID!=null) {
-			share(us.getId(), req.getParameter("share"), shareID, req, resp);
+		if (shareID != null) {
+			String share = req.getParameter("share");
+			share(us.getEmail(), share, shareID, req, resp);
+			if (sendMail = true) {
+				createShare(us, shareID, shareID);
+			}
 		}
 		req.getRequestDispatcher("/views/User/layout.jsp").forward(req, resp);
 	}
@@ -109,6 +126,10 @@ public class home extends HttpServlet {
 	}
 
 	private void doSignOut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String username = CookieUntils.get("username", req);
+		String password = CookieUntils.get("password", req);
+		req.setAttribute("username", username);
+		req.setAttribute("password", password);
 		req.getSession().setAttribute("us", null);
 		req.getRequestDispatcher("/views/User/Login.jsp").forward(req, resp);
 	}
@@ -119,13 +140,9 @@ public class home extends HttpServlet {
 		VideoDAO dao = new VideoDAO();
 		Video video = dao.findByMainKey(itemId);
 		video.setViews(video.getViews() + 1);
-		String like=req.getParameter("like");
-		String dislike=req.getParameter("dislike");
-		if(like!=null && us!=null) {
-			like(us, like, req, resp);
-		}if(dislike!=null && us!=null) {
-			unLike(us.getId(), dislike);
-		}
+		String status = req.getParameter("like");
+		System.out.println("itemId");
+		
 		req.setAttribute("random", dao.randomVideo());
 		req.setAttribute("form", dao.findByMainKey(itemId));
 		req.getRequestDispatcher("/views/User/detail.jsp").forward(req, resp);
@@ -178,20 +195,15 @@ public class home extends HttpServlet {
 						req.setAttribute("message", "Sai mật khẩu!");
 					} else {
 						req.setAttribute("message", "Đăng nhập thành công!");
-						if (!us.getAdmin()) {
-							req.getSession().setAttribute("us", us);
-							req.getRequestDispatcher("/views/User/layout.jsp").forward(req, resp);
-						} else {
-							req.getSession().setAttribute("us", us);
-							req.getRequestDispatcher("/views/Admin/LayoutAdmin.jsp").forward(req, resp);
-						}
+						req.getSession().setAttribute("us", us);
+						int hours = (remember == null) ? 0 : 30 * 24;
+						CookieUntils.add("username", id, hours, resp);
+						CookieUntils.add("password", pw, hours, resp);
+						req.getRequestDispatcher("/views/User/layout.jsp").forward(req, resp);
 					}
 				} catch (Exception e) {
 					req.setAttribute("message", "Sai tên đăng nhập!");
 				}
-				int hours = (remember == null) ? 0 : 30 * 24;
-				CookieUntils.add("id", id, hours, resp);
-				CookieUntils.add("password", pw, hours, resp);
 				req.getRequestDispatcher("/views/User/Login.jsp").forward(req, resp);
 			}
 		} else if (uri.contains("forgot")) {
@@ -246,6 +258,8 @@ public class home extends HttpServlet {
 		req.getRequestDispatcher("/views/User/Login.jsp").forward(req, resp);
 	}
 
+	public static boolean sendMail = false;
+
 	public static void share(String from, String to, String videoID, HttpServletRequest req, HttpServletResponse resp)
 			throws UnsupportedEncodingException {
 		// Thong so ket noi SMTP Server
@@ -266,11 +280,11 @@ public class home extends HttpServlet {
 		});
 		req.setCharacterEncoding("utf-8");
 		resp.setCharacterEncoding("utf-8");
-		String[] toArr = to.split("\\s+");
+		String[] toArr = to.split("\\s");
 		try {
 			// Ket noi SMTP Server
 			String subject, body;
-			subject = "Đây là mật khẩu của bạn";
+			subject = from + "Đã gửi cho bạn";
 			body = "youtube.com/watch?v=" + videoID;
 			// Tao message
 			MimeMessage msg = new MimeMessage(session);
@@ -282,32 +296,44 @@ public class home extends HttpServlet {
 			msg.setText(body, "utf-8", "html");
 			msg.setReplyTo(msg.getFrom());
 			Transport.send(msg);
-			req.setAttribute("message2", "Gửi email thành công !");
+			sendMail = true;
+			req.setAttribute("msg2", "Gửi email thành công !");
 		} catch (Exception e) {
-			req.setAttribute("message2", "Gửi email thất bại !");
+			req.setAttribute("msg2", "Gửi email thất bại !");
 			e.printStackTrace();
 		}
 
 	}
-
-	public static void like(User us, String idVideo, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	public static void like(User us, String idVideo, HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
 		FavoriteDAO dao = new FavoriteDAO();
 		VideoDAO daoVideo = new VideoDAO();
-		if(dao.findByMainKey(us.getId(),idVideo) ==null) {
+		if (dao.findByMainKey(us.getId(), idVideo) == null) {
 			Favorite entity = new Favorite();
 			entity.setUser(us);
 			entity.setLikeDate(new Date());
 			entity.setVideo(daoVideo.findByMainKey(idVideo));
 			dao.create(entity);
 			alert("Video được chuyển vào video yêu thích <3", req, resp);
-		}else {
+		} else {
 			alert("Bạn đã thích video này rồi đó <3", req, resp);
 		}
 	}
 
 	public static void unLike(String id, String idVideo) {
 		FavoriteDAO dao = new FavoriteDAO();
-		dao.delete(id,idVideo);
+		dao.delete(id, idVideo);
+	}
+
+	public static void createShare(User us, String key, String emails) {
+		ShareDAO dao = new ShareDAO();
+		VideoDAO daoVideo = new VideoDAO();
+		Share entity = new Share();
+		entity.setUser(us);
+		entity.setVideo(daoVideo.findByMainKey(key));
+		entity.setEmails(emails);
+		entity.setShare(new Date());
+		dao.create(entity);
 	}
 
 	public static void alert(String desciption, HttpServletRequest request, HttpServletResponse response)

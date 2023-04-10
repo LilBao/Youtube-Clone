@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.StoredProcedureQuery;
+import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -17,6 +19,7 @@ import javax.servlet.http.Part;
 import org.apache.commons.beanutils.BeanUtils;
 
 import bean.Report;
+import bean.Share;
 import bean.User;
 import bean.Video;
 import untils.JpaUntils;
@@ -28,10 +31,14 @@ import untils.VideoDAO;
 @WebServlet({ "/Admin", "/User", "/Video", "/Report", "/User/Update", "/User/Delete", "/User/Edit/*", "/Video/Create",
 		"/Video/Update", "/Video/Delete", "/Video/Edit/*"})
 public class AdminServlet extends HttpServlet {
+    EntityManager em = JpaUntils.getEntityManager();
+
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String uri = req.getRequestURI();
 		if (uri.contains("Admin")) {
+			User us = (User) req.getSession().getAttribute("us");
+			req.getSession().setAttribute("us", us);
 			req.getRequestDispatcher("/views/Admin/LayoutAdmin.jsp").forward(req, resp);
 		} else if (uri.contains("Video")) {
 			this.doVideo(req, resp);
@@ -44,24 +51,38 @@ public class AdminServlet extends HttpServlet {
 
 	private void doReport(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		VideoDAO daoVideo = new VideoDAO();		
-		ReportDAO daoReport = new ReportDAO();
 		List<Video> title = daoVideo.findAll();
 		req.setAttribute("titles", title);
+	
+		int page1 = 1;
+	    int recordsPerPage = 6;
 		// Report favoriteVideo
-		List<Report> listReport = daoReport.report();
-		req.setAttribute("reports", listReport);
+	    if(req.getParameter("page1") != null)
+	        page1 = Integer.parseInt(req.getParameter("page1"));
+	    	String jpql="Select new Report(o.video.title,count(o), max(o.likeDate), min(o.likeDate)) from Favorite o group by o.video.title";
+	    	TypedQuery<Report> query = em.createQuery(jpql,Report.class);
+	    	query.setFirstResult((page1-1) * recordsPerPage);
+	    	query.setMaxResults(recordsPerPage);
+	    	List<Report> listReport =query.getResultList();
+	    	int noOf1Records = ((Number) em.createQuery(jpql).getResultList().size()).intValue();
+		    int noOf1Pages = (int) Math.ceil(noOf1Records * 1.0 / recordsPerPage);
+		    req.setAttribute("noOf1Pages", noOf1Pages);
+		    req.setAttribute("current1Page", page1);
+	    	req.setAttribute("reports", listReport);
+	    	
 		// Report Favortite User
 		String idVideo = req.getParameter("idVideo");
-		if (idVideo == null) { // Kiểm tra nếu giá trị bằng null
+		if (idVideo == null) { 				// Kiểm tra nếu giá trị bằng null
 			idVideo = title.get(0).getId(); // Lấy giá trị đầu tiên trong trường hợp giá trị bị null
-			List<Object[]> favoriteUser = daoReport.favoriteUser(idVideo);
-			req.setAttribute("favoriteUser", favoriteUser);
+			reportFavoriteUser(idVideo, req, resp);
+		    //Report send mail
+			reportSendMail(idVideo, req, resp);
 		} else {
-			List<Object[]> favoriteUser = daoReport.favoriteUser(idVideo);
-			req.setAttribute("favoriteUser", favoriteUser);
+			//Report Favorite User
+			reportFavoriteUser(idVideo, req, resp);
+			 //Report send mail
+			reportSendMail(idVideo, req, resp);	
 		}
-		// Report sendVideo
-		System.out.println(idVideo);
 		req.getRequestDispatcher("/views/Admin/Report.jsp").forward(req, resp);
 	}
 
@@ -69,8 +90,6 @@ public class AdminServlet extends HttpServlet {
 		String uri = req.getRequestURI();
 		User user = new User();
 		UserDAO dao = new UserDAO();
-		List<User> list = dao.findAll();
-		String method = req.getMethod();
 		if (uri.contains("Edit")) {
 			String id = uri.substring(uri.lastIndexOf("/") + 1);
 			user = dao.findByMainKey(id);
@@ -93,6 +112,21 @@ public class AdminServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
+		//Phan trang 
+		int page = 1;
+	    int recordsPerPage = 10;
+	    if(req.getParameter("page") != null)
+	        page = Integer.parseInt(req.getParameter("page"));
+	    TypedQuery<User> query = em.createQuery("FROM User", User.class);
+	    query.setFirstResult((page-1) * recordsPerPage);
+	    query.setMaxResults(recordsPerPage);
+	    List<User> list = query.getResultList();
+	    
+	    int noOfRecords = ((Number) em.createQuery("SELECT COUNT(o) FROM User o").getSingleResult()).intValue();
+	    int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
+	    req.setAttribute("noOfPages", noOfPages);
+	    req.setAttribute("currentPage", page);
+		//
 		req.setAttribute("form", user);
 		req.setAttribute("users", list);
 		req.getRequestDispatcher("/views/Admin/UserManagement.jsp").forward(req, resp);
@@ -100,14 +134,8 @@ public class AdminServlet extends HttpServlet {
 
 	private void doVideo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String uri = req.getRequestURI();
-		String method = req.getMethod();
 		Video video = new Video();
 		VideoDAO dao = new VideoDAO();
-		List<Video> list = dao.findAll();
-		File dir = new File(req.getServletContext().getRealPath("/files"));
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
 		if (uri.contains("Edit")) {
 			String id = uri.substring(uri.lastIndexOf("/") + 1);
 			video = dao.findByMainKey(id);
@@ -145,8 +173,55 @@ public class AdminServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
+		//phan trang
+		int page =1;
+		int recordsPerPage=10;
+		if(req.getParameter("page")!=null)
+			 page = Integer.parseInt(req.getParameter("page"));
+		TypedQuery<Video> query = em.createQuery("from Video", Video.class);
+		query.setFirstResult((page-1)*recordsPerPage);
+		query.setMaxResults(recordsPerPage);
+		List<Video> list = query.getResultList();
+		
+		int noOfRecords = ((Number) em.createQuery("select count(o) from Video o").getSingleResult()).intValue();
+		int noOfPages = (int) Math.ceil( noOfRecords * 1.0 / recordsPerPage);
+		//
+		req.setAttribute("noOfPages", noOfPages);
+	    req.setAttribute("currentPage", page);
 		req.setAttribute("form", video);
 		req.setAttribute("videos", list);
 		req.getRequestDispatcher("/views/Admin/VideoManagement.jsp").forward(req, resp);
+	}
+	public void reportFavoriteUser(String idVideo,HttpServletRequest req, HttpServletResponse resp) {
+		int page2 = 1;
+	    int recordsPerPage2 = 10; 
+		if(req.getParameter("page2") != null)
+		page2 = Integer.parseInt(req.getParameter("page2"));
+		StoredProcedureQuery query2 = em.createNamedStoredProcedureQuery("Report.favoritesUser");
+		query2.setParameter("id",idVideo);
+		List<Object[]> favoriteUser = query2.getResultList();
+    	query2.setFirstResult((page2-1) * recordsPerPage2);
+    	query2.setMaxResults(recordsPerPage2);
+    	int noOf2Records = ((Number) query2.getResultList().size()).intValue();
+	    int noOf2Pages = (int) Math.ceil(noOf2Records * 1.0 / recordsPerPage2);
+	    req.setAttribute("noOf2Pages", noOf2Pages);
+	    req.setAttribute("current2Page", page2);
+	    req.setAttribute("favoriteUser", favoriteUser);
+	}
+	public void reportSendMail(String idVideo,HttpServletRequest req, HttpServletResponse resp) {
+		int page3 = 1;
+	    int recordsPerPage3 = 10; 
+		if(req.getParameter("page3") != null)
+			page3 = Integer.parseInt(req.getParameter("page3"));
+		StoredProcedureQuery query3 = em.createNamedStoredProcedureQuery("Report.sendMail");
+		query3.setParameter("id",idVideo);
+		List<Object[]> listSend = query3.getResultList();
+		query3.setFirstResult((page3-1) * recordsPerPage3);
+    	query3.setMaxResults(recordsPerPage3);
+    	int noOf3Records = ((Number)  query3.getResultList().size()).intValue();
+	    int noOf3Pages = (int) Math.ceil(noOf3Records * 1.0 / recordsPerPage3);
+	    req.setAttribute("noOf3Pages", noOf3Pages);
+	    req.setAttribute("current3Page", page3);
+	    req.setAttribute("listSend", listSend);
 	}
 }

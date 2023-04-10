@@ -40,8 +40,7 @@
 				<form action="${url}" method="post" enctype="multipart/form-data">
 				        <div class="row">
 				          <div class="col-4 my-4">
-<!-- 				            <input type="file" name="photo_file">
- -->				             <div class="form-floating">
+ 				             <div class="form-floating">
 				                <input name="poster" value="${form.poster}" type="text" id="poster" class="form-control" placeholder="Poster src" />
 				                <label class="form-label" for="poster">Poster src</label>
 				              </div>
@@ -135,11 +134,30 @@
 				      </tbody>
 				    </table>
 				    <div class="d-flex justify-content-center">
-				      <button class="btn btnbg btn-outline-dark m-2" type="submit"><i class="bi bi-arrow-bar-left"></i></i></button>
-				      <button class="btn btnbg btn-outline-dark m-2" type="submit"><i class="bi bi-arrow-left"></i></button>
-				      <button class="btn btnbg btn-outline-dark m-2" type="submit"><i class="bi bi-arrow-right"></i></button>
-				      <button class="btn btnbg btn-outline-dark m-2" type="submit"><i class="bi bi-arrow-bar-right"></i></button>
-				    </div>
+				     			<%
+								int currentPage = (Integer) request.getAttribute("currentPage");
+								int noOfPages = (Integer) request.getAttribute("noOfPages");
+								%>
+								<div>
+									<ul class="pagination">
+								    <% if(currentPage > 1) { %>
+								        <li class="page-item"><a class="page-link" href="${url}?page=<%= currentPage - 1 %>">Previous</a></li>
+								    <% } %>
+								
+								    <% for(int i=1; i<=noOfPages; i++) { %>
+								        <% if(i == currentPage) { %>
+								            <li class="page-item"><b class="page-link"><%=i %></b></li>
+								        <% } else { %>
+								       		<li class="page-item"><a class="page-link" href="${url}?page=<%= i %>"><%= i %></a></li>
+								        <% } %>
+								    <% } %>
+								
+								    <% if(currentPage < noOfPages) { %>
+								       <li class="page-item"> <a class="page-link" href="${url}?page=<%= currentPage + 1 %>">Next</a></li>
+								    <% } %>
+								     </ul>
+								</div>
+					</div>
 				  </section>
 				</div>
 			</div>
