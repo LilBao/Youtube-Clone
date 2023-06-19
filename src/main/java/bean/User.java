@@ -2,6 +2,7 @@ package bean;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -22,9 +23,9 @@ public class User {
 	String email;
 	@Column(name = "admin")
 	Boolean admin = false;
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
 	List<Favorite> favorite;
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
 	List<Share> share;
 
 	public User() {

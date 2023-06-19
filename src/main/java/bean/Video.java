@@ -2,6 +2,7 @@ package bean;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -20,9 +21,9 @@ public class Video {
 	private String description;
 	private boolean active;
 	private long views;
-	@OneToMany(mappedBy = "video")
+	@OneToMany(mappedBy = "video",cascade = CascadeType.ALL)
 	List<Favorite> favorite;
-	@OneToMany(mappedBy = "video")
+	@OneToMany(mappedBy = "video",cascade = CascadeType.ALL)
 	List<Share> share;
 
 	public Video() {
